@@ -4,1371 +4,2819 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>devXintel - AI-Powered Co-Pilot for Startups</title>
+    <title>DevXintel - AI-Native Engineering Platform</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <style>
-        /* Global Styles */
+        :root {
+            --primary: #0066FF;
+            --primary-dark: #0052D4;
+            --primary-light: #3391FF;
+            --secondary: #8B46FF;
+            --accent: #00D4AA;
+            --dark: #0A0F1C;
+            --darker: #050913;
+            --light: #F0F5FF;
+            --gray: #8C9DB5;
+            --success: #00E6A1;
+            --gradient-primary: linear-gradient(135deg, var(--primary), var(--secondary));
+            --gradient-dark: linear-gradient(135deg, var(--dark), var(--darker));
+            --gradient-accent: linear-gradient(135deg, var(--accent), var(--primary-light));
+            --shadow: 0 10px 30px rgba(0, 102, 255, 0.15);
+            --shadow-lg: 0 25px 50px rgba(0, 102, 255, 0.25);
+            --radius: 16px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
         }
 
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            color: #e6e6e6;
-            overflow: hidden;
-            height: 100vh;
+            background-color: var(--darker);
+            color: var(--light);
+            line-height: 1.6;
         }
 
-        .container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Slide Styles - Fixed for proper scrolling */
         .slides-container {
-            position: relative;
             width: 100%;
-            height: 100%;
+            height: 100vh;
+            position: relative;
             overflow: hidden;
         }
 
         .slide {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            /* Changed from center to flex-start */
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-            overflow-y: auto;
-            /* Enable scrolling for individual slides */
-            overflow-x: hidden;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+            transform: translateX(100%);
+            z-index: 1;
         }
 
         .slide.active {
             opacity: 1;
-            z-index: 10;
+            visibility: visible;
+            transform: translateX(0);
+            z-index: 2;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%);
+        }
+
+        .slide.next {
+            transform: translateX(100%);
+        }
+
+        .slide-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: var(--gradient-dark);
         }
 
         .slide-content {
-            max-width: 1000px;
-            width: 90%;
-            background: rgba(30, 30, 50, 0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(100, 100, 150, 0.2);
-            transform: translateY(20px);
-            opacity: 0;
-            transition: transform 0.8s ease, opacity 0.8s ease;
-            margin: 40px 0;
-            /* Added margin for top and bottom */
+            max-width: 1200px;
+            width: 100%;
+            z-index: 2;
+            position: relative;
+            padding: 2rem 0;
+            overflow-y: auto;
+            max-height: 100%;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
 
-        .slide.active .slide-content {
-            transform: translateY(0);
-            opacity: 1;
+        .slide-content::-webkit-scrollbar {
+            display: none;
         }
 
-        /* Navigation - Fixed positioning for consistent access */
-        .navigation {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            right: 0;
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
+
+        .workflow-stats {
             display: flex;
-            justify-content: center;
-            z-index: 100;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+            }
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            font-weight: 800;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 2rem;
+        }
+
+        h3 {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+        }
+
+        h4 {
+            font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--gray);
+            font-weight: 400;
+        }
+
+        .tagline {
+            font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+            font-weight: 500;
+            color: var(--accent);
+            margin-bottom: 2.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .tagline::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60%;
+            height: 3px;
+            background: var(--gradient-accent);
+            border-radius: 3px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
             gap: 10px;
-            background: rgba(26, 26, 46, 0.7);
-            backdrop-filter: blur(5px);
-            padding: 10px;
-            border-radius: 30px;
-            width: fit-content;
-            margin: 0 auto;
-        }
-
-        .member-photo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 10px;
-            border: 2px solid #ccc;
-            /* subtle border to look nice */
-        }
-
-        .nav-btn {
-            background: rgba(200, 200, 255, 0.3);
+            padding: 1rem 2.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
             border: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
             cursor: pointer;
+            box-shadow: var(--shadow);
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: var(--gradient-accent);
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logo {
+            font-size: clamp(1.8rem, 4vw, 2.2rem);
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 3rem;
+            display: inline-block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--gradient-primary);
+            z-index: 2;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(0, 102, 255, 0.3);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* NEW STYLES FOR HOSTING OPTIONS TABLE */
+        .hosting-table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 3rem 0;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .hosting-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .hosting-table th {
+            background: rgba(0, 102, 255, 0.2);
+            padding: 1.5rem 1rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .hosting-table td {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--gray);
+        }
+
+        .hosting-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .hosting-table tr:hover {
+            background: rgba(0, 102, 255, 0.05);
+        }
+
+        .hosting-type {
+            font-weight: 700;
+            color: var(--light);
+        }
+
+        .hosting-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0.2rem 0;
+        }
+
+        .badge-client {
+            background: rgba(0, 212, 170, 0.2);
+            color: var(--accent);
+        }
+
+        .badge-devxintel {
+            background: rgba(0, 102, 255, 0.2);
+            color: var(--primary-light);
+        }
+
+        .pricing-highlight {
+            font-weight: 800;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .pricing-note {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .recommended-badge {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background: var(--gradient-primary);
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .hosting-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hosting-card.recommended {
+            border: 2px solid var(--primary);
+        }
+
+        .hosting-features {
+            margin-top: 2rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .feature-list li {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* STYLES FOR MVP VIDEO AND ARCHITECTURE DIAGRAM */
+        .mvp-video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mvp-video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: var(--radius);
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 450px;
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .architecture-container {
+            position: relative;
+            width: 100%;
+            margin: 2rem auto;
+            overflow: hidden;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            background: rgba(10, 15, 28, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .zoomable-image {
+            width: 100%;
+            height: auto;
+            cursor: zoom-in;
+            transition: transform 0.3s ease;
+            display: block;
+        }
+
+        .zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
             transition: all 0.3s ease;
         }
 
-        .nav-btn.active {
-            background: #a78bfa;
-            transform: scale(1.3);
+        .zoom-overlay.active {
+            opacity: 1;
+            visibility: visible;
         }
 
-        .arrow-nav {
-            position: fixed;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 100;
-            transform: translateY(-50%);
-            pointer-events: none;
-            /* Allow clicks to pass through to content */
+        .zoomed-image {
+            max-width: 90%;
+            max-height: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
-        .arrow-btn {
-            background: rgba(200, 200, 255, 0.2);
-            color: white;
+        .zoom-overlay.active .zoomed-image {
+            transform: scale(1);
+        }
+
+        .close-zoom {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255, 255, 255, 0.1);
             border: none;
+            color: white;
             width: 50px;
             height: 50px;
             border-radius: 50%;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
             cursor: pointer;
-            font-size: 20px;
             transition: all 0.3s ease;
-            opacity: 0.7;
-            pointer-events: auto;
-            /* Re-enable clicks for buttons */
+            z-index: 1001;
         }
 
-        .arrow-btn:hover {
-            background: rgba(167, 139, 250, 0.5);
-            opacity: 1;
+        .close-zoom:hover {
+            background: var(--primary);
             transform: scale(1.1);
         }
 
-        /* Typography */
-        h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            text-align: center;
-            background: linear-gradient(45deg, #a78bfa, #7dd3fc);
+        .architecture-placeholder {
+            width: 100%;
+            height: 400px;
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .architecture-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 10px rgba(125, 211, 252, 0.3);
-            animation: pulse 3s infinite;
         }
 
-        h2 {
-            font-size: 2.2rem;
-            margin-bottom: 25px;
-            color: #7dd3fc;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.8s ease 0.3s;
-        }
-
-        .slide.active h2 {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        h3 {
-            font-size: 1.8rem;
-            margin: 25px 0 15px;
-            color: #a78bfa;
-            opacity: 0;
-            transform: translateX(-20px);
-            transition: all 0.8s ease 0.5s;
-        }
-
-        .slide.active h3 {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 15px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.8s ease 0.7s;
-        }
-
-        .slide.active p {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        ul {
-            list-style-type: none;
-            padding-left: 20px;
-        }
-
-        li {
-            margin-bottom: 12px;
-            font-size: 1.1rem;
-            position: relative;
-            padding-left: 30px;
-            opacity: 0;
-            transform: translateX(-20px);
-            transition: all 0.6s ease;
-        }
-
-        .slide.active li {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        li:before {
-            content: "•";
-            color: #7dd3fc;
-            font-size: 1.5rem;
-            position: absolute;
-            left: 0;
-            top: -3px;
-        }
-
-        /* Specific Slide Styles */
-        .title-slide {
-            text-align: center;
-        }
-
-        .title-slide .subtitle {
-            font-size: 1.8rem;
-            margin-bottom: 30px;
-            color: #bbbbbb;
-            opacity: 0;
-            animation: fadeInUp 1s ease 0.5s forwards;
-        }
-
-        .tagline {
-            font-style: italic;
-            font-size: 1.4rem;
-            color: #a78bfa;
-            margin-top: 20px;
-            opacity: 0;
-            animation: fadeInUp 1s ease 1s forwards;
-        }
-
-        .problem-list li:before {
-            color: #f87171;
-        }
-
-        .solution-grid {
+        .team-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 20px;
-        }
-
-        .solution-column {
-            background: rgba(40, 40, 70, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-
-        .slide.active .solution-column {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .slide.active .solution-column:nth-child(1) {
-            transition-delay: 0.4s;
-        }
-
-        .slide.active .solution-column:nth-child(2) {
-            transition-delay: 0.6s;
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            opacity: 0;
-            transform: scale(0.95);
-            transition: all 0.8s ease 0.5s;
-        }
-
-        .slide.active .comparison-table {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .comparison-table th,
-        .comparison-table td {
-            padding: 15px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .comparison-table th {
-            background: rgba(30, 30, 60, 0.5);
-            font-weight: 600;
-            color: #7dd3fc;
-        }
-
-        .check {
-            color: #86efac;
-            font-size: 1.5rem;
-        }
-
-        .cross {
-            color: #f87171;
-            font-size: 1.5rem;
-        }
-
-        .market-stats {
-            display: flex;
-            justify-content: space-around;
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .stat {
-            background: rgba(40, 40, 70, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            width: 45%;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-
-        .slide.active .stat {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .slide.active .stat:nth-child(1) {
-            transition-delay: 0.4s;
-        }
-
-        .slide.active .stat:nth-child(2) {
-            transition-delay: 0.6s;
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #a78bfa;
-            margin-bottom: 10px;
-        }
-
-        .demo-steps {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .demo-step-image {
-            width: 350px;
-            height: auto;
-            margin-bottom: 10px;
-        }
-
-        .demo-step {
-            background: rgba(40, 40, 70, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-
-        .slide.active .demo-step {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .slide.active .demo-step:nth-child(1) {
-            transition-delay: 0.3s;
-        }
-
-        .slide.active .demo-step:nth-child(2) {
-            transition-delay: 0.4s;
-        }
-
-        .slide.active .demo-step:nth-child(3) {
-            transition-delay: 0.5s;
-        }
-
-        .slide.active .demo-step:nth-child(4) {
-            transition-delay: 0.6s;
-        }
-
-        .demo-step-number {
-            font-size: 1rem;
-            width: 25px;
-            height: 25px;
-            background: #7dd3fc;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 15px;
-            color: #1a1a2e;
-        }
-
-        .pricing-tiers {
-            display: flex;
-            justify-content: space-around;
-            margin: 30px 0;
-            gap: 20px;
-        }
-
-        .pricing-tier {
-            background: rgba(40, 40, 70, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            flex: 1;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-
-        .slide.active .pricing-tier {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .slide.active .pricing-tier:nth-child(1) {
-            transition-delay: 0.3s;
-        }
-
-        .slide.active .pricing-tier:nth-child(2) {
-            transition-delay: 0.5s;
-        }
-
-        .slide.active .pricing-tier:nth-child(3) {
-            transition-delay: 0.7s;
-        }
-
-        .tier-name {
-            font-size: 1.5rem;
-            color: #a78bfa;
-            margin-bottom: 15px;
-        }
-
-        .funds-allocation {
-            display: flex;
-            justify-content: center;
-            margin: 30px 0;
-        }
-
-        .allocation-chart {
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: conic-gradient(#a78bfa 0% 40%,
-                    #7dd3fc 40% 65%,
-                    #86efac 65% 85%,
-                    #fcd34d 85% 95%,
-                    #f87171 95% 100%);
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transform: scale(0);
-            transition: all 1s ease 0.5s;
-        }
-
-        .slide.active .allocation-chart {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .allocation-center {
-            width: 150px;
-            height: 150px;
-            background: #1a1a2e;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: #7dd3fc;
-        }
-
-        .team-members {
-            display: flex;
-            justify-content: space-around;
-            margin: 30px 0;
-            flex-wrap: wrap;
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
         }
 
         .team-member {
             text-align: center;
-            background: rgba(40, 40, 70, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            width: 45%;
-            min-width: 250px;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
+            padding: 2rem;
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
         }
 
-        .slide.active .team-member {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .slide.active .team-member:nth-child(1) {
-            transition-delay: 0.3s;
-        }
-
-        .slide.active .team-member:nth-child(2) {
-            transition-delay: 0.5s;
-        }
-
-        .member-photo {
+        .team-avatar {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #a78bfa, #7dd3fc);
-            margin: 0 auto 15px;
+            margin: 0 auto 1.5rem;
+            background: var(--gradient-primary);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             font-size: 2.5rem;
-            color: #1a1a2e;
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .team-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .team-role {
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            flex: 1;
+            min-width: 180px;
+            margin: 1rem;
+        }
+
+        .stat-number {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 900;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .contact-info {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2.5rem;
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+            /* background: rgba(10, 15, 28, 0.8); */
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            /* backdrop-filter: blur(10px); */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .slide-indicators {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin: 0 1rem;
+        }
+
+        .slide-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slide-indicator.active {
+            background: var(--primary);
+            transform: scale(1.2);
         }
 
         .progress-bar {
-            height: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            margin: 30px 0;
-            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            z-index: 100;
+            transition: width 0.3s ease;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #7dd3fc, #a78bfa);
-            width: 0%;
-            transition: width 1.5s ease-in-out 0.8s;
-        }
-
-        .slide.active .progress-fill {
-            width: 60%;
-        }
-
-        .competitor-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .competitor-item {
-            background: rgba(40, 40, 70, 0.5);
-            padding: 15px;
-            border-radius: 10px;
+        .section-header {
             text-align: center;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: all 0.6s ease;
+            margin-bottom: 3rem;
         }
 
-        .slide.active .competitor-item {
-            opacity: 1;
-            transform: scale(1);
+        .section-header h2 {
+            position: relative;
+            display: inline-block;
         }
 
-        .slide.active .competitor-item:nth-child(1) {
-            transition-delay: 0.2s;
-        }
-
-        .slide.active .competitor-item:nth-child(2) {
-            transition-delay: 0.4s;
-        }
-
-        .slide.active .competitor-item:nth-child(3) {
-            transition-delay: 0.6s;
-        }
-
-        .slide.active .competitor-item:nth-child(4) {
-            transition-delay: 0.8s;
-        }
-
-        .competitor-name {
-            font-weight: bold;
-            color: #a78bfa;
-            margin-bottom: 10px;
-        }
-
-        .traction-logos {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 20px 0;
-        }
-
-        .traction-logo {
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 100px;
-            height: 100px;
-            background: rgba(40, 40, 70, 0.5);
-            border-radius: 15px;
+            height: 4px;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 3rem auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: var(--gradient-primary);
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            padding: 2rem;
+            position: relative;
+            width: 50%;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+
+        .timeline-content {
+            padding: 2rem;
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content::after {
+            content: '';
+            position: absolute;
+            top: 30px;
+            right: -10px;
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 10px solid rgba(10, 15, 28, 0.7);
+        }
+
+        .timeline-item:nth-child(even) .timeline-content::after {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: -10px;
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 10px solid rgba(10, 15, 28, 0.7);
+        }
+
+        .timeline-date {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .financial-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .financial-table th,
+        .financial-table td {
+            padding: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .financial-table th {
+            background: rgba(0, 102, 255, 0.1);
+            font-weight: 700;
+            color: var(--light);
+        }
+
+        .financial-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .financial-table .highlight {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .customer-logos {
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
-            color: #7dd3fc;
+            gap: 3rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .customer-logo {
+            width: 150px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--gray);
             font-size: 1.2rem;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s ease;
+            transition: all 0.3s ease;
         }
 
-        .slide.active .traction-logo {
-            opacity: 1;
-            transform: translateY(0);
+        .customer-logo:hover {
+            background: rgba(0, 102, 255, 0.1);
+            color: var(--light);
+            transform: translateY(-5px);
         }
 
-        .slide.active .traction-logo:nth-child(1) {
-            transition-delay: 0.3s;
+        /* Enhanced Workflow Styles */
+        .workflow-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        .slide.active .traction-logo:nth-child(2) {
-            transition-delay: 0.5s;
-        }
-
-        .slide.active .traction-logo:nth-child(3) {
-            transition-delay: 0.7s;
-        }
-
-        .vision-text {
-            text-align: center;
-            font-size: 1.8rem;
-            color: #a78bfa;
-            margin: 30px 0;
-            font-style: italic;
-            opacity: 0;
-            transform: scale(1.1);
-            transition: all 0.8s ease 0.5s;
-            max-width: 800px;
+        .workflow-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: 50px;
+            padding: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: fit-content;
             margin-left: auto;
             margin-right: auto;
         }
 
-        .slide.active .vision-text {
-            opacity: 1;
-            transform: scale(1);
+        .workflow-tab {
+            padding: 1rem 2rem;
+            border: none;
+            background: transparent;
+            color: var(--gray);
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .website-link {
+        .workflow-tab.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .workflow-content {
+            display: none;
+        }
+
+        .workflow-content.active {
             display: block;
-            text-align: center;
+        }
+
+        .workflow-diagram.enhanced {
+            max-width: 100%;
+        }
+
+        .workflow-phase {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(10, 15, 28, 0.5);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .phase-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
             font-size: 1.5rem;
-            color: #7dd3fc;
-            margin-top: 20px;
-            text-decoration: none;
-            opacity: 0;
-            transition: all 0.8s ease 0.7s;
+            color: white;
+            flex-shrink: 0;
         }
 
-        .slide.active .website-link {
-            opacity: 1;
+        .phase-title {
+            flex: 1;
         }
 
-        .website-link:hover {
-            text-decoration: underline;
+        .phase-title h3 {
+            margin-bottom: 0.5rem;
+            color: var(--light);
         }
 
-        .website-link,
-        .email-link,
-        .contact-number {
+        .phase-title p {
+            margin-bottom: 0;
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        .monitoring-badge {
+            text-align: right;
+        }
+
+        .monitoring-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .agent-badge.monitoring {
+            background: rgba(139, 70, 255, 0.2);
+            color: var(--secondary);
+        }
+
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .agent-card {
+            background: rgba(10, 15, 28, 0.7);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 102, 255, 0.3);
+            box-shadow: var(--shadow);
+        }
+
+        .agent-card.optional {
+            border-style: dashed;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .agent-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
             font-size: 1.2rem;
-            color: #7dd3fc;
-            text-decoration: none;
         }
 
-        .website-link:hover,
-        .email-link:hover {
-            text-decoration: underline;
+        .agent-icon.primary {
+            background: rgba(0, 102, 255, 0.2);
+            color: var(--primary);
         }
 
-        .contact-number {
-            font-weight: bold;
+        .agent-icon.secondary {
+            background: rgba(0, 212, 170, 0.2);
+            color: var(--accent);
         }
 
-        .email-link {
-            display: block;
+        .agent-card h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            color: var(--light);
+        }
+
+        .agent-card p {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            color: var(--gray);
+            line-height: 1.5;
+        }
+
+        .agent-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .metric {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .optional-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 212, 170, 0.2);
+            color: var(--accent);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .phase-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .connector-line {
+            width: 2px;
+            height: 40px;
+            background: var(--gradient-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .connector-arrow {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .continue-section {
             text-align: center;
-            font-size: 1.5rem;
-            color: #7dd3fc;
-            margin-top: 10px;
+            margin-top: 2rem;
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 50px;
             text-decoration: none;
-            opacity: 0;
-            transition: all 0.8s ease 0.9s;
-            /* Slight delay after the website link */
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.9rem;
         }
 
-        .slide.active .email-link {
-            opacity: 1;
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
         }
 
-        .email-link:hover {
-            text-decoration: underline;
+        /* Agent Matrix Styles */
+        .agent-matrix {
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+        .matrix-category {
+            margin-bottom: 2.5rem;
+        }
+
+        .matrix-category h4 {
+            margin-bottom: 1rem;
+            color: var(--light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .matrix-category h4 i {
+            color: var(--primary);
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .matrix-item {
+            padding: 1rem 1.2rem;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .matrix-item.primary {
+            background: rgba(0, 102, 255, 0.2);
+            color: var(--primary-light);
+            border: 1px solid rgba(0, 102, 255, 0.3);
+        }
+
+        .matrix-item.optional {
+            background: rgba(0, 212, 170, 0.2);
+            color: var(--accent);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-style: dashed;
+        }
+
+        .matrix-item.monitoring {
+            background: rgba(139, 70, 255, 0.2);
+            color: var(--secondary);
+            border: 1px solid rgba(139, 70, 255, 0.3);
+        }
+
+        .matrix-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .matrix-legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: rgba(10, 15, 28, 0.5);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.primary {
+            background: rgba(0, 102, 255, 0.6);
+        }
+
+        .legend-color.optional {
+            background: rgba(0, 212, 170, 0.6);
+        }
+
+        .legend-color.monitoring {
+            background: rgba(139, 70, 255, 0.6);
+        }
+
+        /* Token Example Styles */
+        .token-example {
+            background: rgba(10, 15, 28, 0.5);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+
+        .token-operation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .token-operation:last-child {
+            border-bottom: none;
+        }
+
+        .operation-name {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .token-cost {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .token-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0 0;
+            margin-top: 1rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .total-label {
+            color: var(--light);
+            font-weight: 600;
+        }
+
+        .total-cost {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1200px) {
+            .slide {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 1rem;
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+            .timeline::before {
+                left: 30px;
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 0;
             }
 
-            50% {
-                transform: scale(1.02);
+            .timeline-item:nth-child(even) {
+                left: 0;
             }
 
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        /* Staggered list item animations */
-        .slide.active li:nth-child(1) {
-            transition-delay: 0.1s;
-        }
-
-        .slide.active li:nth-child(2) {
-            transition-delay: 0.2s;
-        }
-
-        .slide.active li:nth-child(3) {
-            transition-delay: 0.3s;
-        }
-
-        .slide.active li:nth-child(4) {
-            transition-delay: 0.4s;
-        }
-
-        .slide.active li:nth-child(5) {
-            transition-delay: 0.5s;
-        }
-
-        .slide.active li:nth-child(6) {
-            transition-delay: 0.6s;
-        }
-
-        .slide.active li:nth-child(7) {
-            transition-delay: 0.7s;
-        }
-
-        .slide.active li:nth-child(8) {
-            transition-delay: 0.8s;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 900px) {
-            h1 {
-                font-size: 2.5rem;
+            .timeline-item:nth-child(odd) .timeline-content::after {
+                left: -10px;
+                right: auto;
+                border-left: none;
+                border-right: 10px solid rgba(10, 15, 28, 0.7);
             }
 
-            h2 {
-                font-size: 1.8rem;
+            .stats {
+                flex-direction: column;
             }
 
-            .slide-content {
-                padding: 25px;
-                margin: 20px 0;
+            .nav-controls {
+                padding: 0.8rem 1.5rem;
             }
 
-            .solution-grid,
-            .demo-steps,
-            .pricing-tiers,
-            .team-members,
-            .competitor-grid {
+            .nav-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .hosting-table-container {
+                font-size: 0.85rem;
+            }
+
+            .hosting-table th,
+            .hosting-table td {
+                padding: 1rem 0.5rem;
+            }
+
+            .video-placeholder {
+                height: 300px;
+            }
+
+            .architecture-placeholder {
+                height: 300px;
+            }
+
+            /* Mobile Responsiveness for Enhanced Workflow */
+            .phase-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .phase-icon {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+
+            .monitoring-badge {
+                text-align: center;
+                margin-top: 1rem;
+            }
+
+            .agent-grid {
                 grid-template-columns: 1fr;
             }
 
-            .market-stats {
+            .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .matrix-legend {
                 flex-direction: column;
+                gap: 1rem;
                 align-items: center;
             }
 
-            .stat {
+            .workflow-phase {
+                padding: 1.5rem;
+            }
+
+            .workflow-tabs {
+                flex-direction: column;
                 width: 100%;
-                margin-bottom: 20px;
+                max-width: 300px;
             }
 
-            .arrow-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-
-            .navigation {
-                bottom: 10px;
-                padding: 8px;
-            }
-
-            .slide {
-                padding: 20px;
+            .workflow-tab {
+                width: 100%;
             }
         }
 
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: 1fr;
             }
 
-            h2 {
-                font-size: 1.5rem;
+            .team-grid {
+                grid-template-columns: 1fr;
             }
 
-            h3 {
-                font-size: 1.3rem;
+            .nav-controls {
+                bottom: 1rem;
+                padding: 0.5rem 1rem;
             }
 
-            p,
-            li {
-                font-size: 1rem;
+            .slide-indicators {
+                margin: 0 0.5rem;
             }
 
-            .slide-content {
-                padding: 20px;
-                width: 95%;
+            .customer-logos {
+                gap: 1.5rem;
             }
 
-            .allocation-chart {
-                width: 250px;
-                height: 250px;
-            }
-
-            .allocation-center {
+            .customer-logo {
                 width: 120px;
-                height: 120px;
+                height: 60px;
                 font-size: 1rem;
+            }
+        }
+
+        /* Slide transition animations */
+        .slide-enter {
+            animation: slideInRight 0.8s forwards;
+        }
+
+        .slide-exit {
+            animation: slideOutLeft 0.8s forwards;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutLeft {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+        }
+
+        .slide-enter-reverse {
+            animation: slideInLeft 0.8s forwards;
+        }
+
+        .slide-exit-reverse {
+            animation: slideOutRight 0.8s forwards;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(100%);
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <!-- Slide 1: Title -->
-        <div class="slide active" id="slide1">
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Zoom overlay for architecture diagram -->
+    <div class="zoom-overlay" id="zoomOverlay">
+        <button class="close-zoom" id="closeZoom">
+            <i class="fas fa-times"></i>
+        </button>
+        <img src="" alt="Zoomed Architecture Diagram" class="zoomed-image" id="zoomedImage">
+    </div>
+
+    <div class="slides-container" id="slidesContainer">
+        <!-- Slide 1: Hero -->
+        <section class="slide active" id="slide1">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-1"></div>
             <div class="slide-content">
-                <div class="title-slide">
-                    <h1>
-                        < /> devXintel
-                    </h1>
-                    <div class="subtitle">An AI-Powered Co-Pilot for Startups</div>
-                    <div class="tagline">From Code to Company – One Platform, Infinite Productivity</div>
+                <div class="logo">DevXintel</div>
+                <h1>AI-Native Engineering Platform</h1>
+                <p class="tagline">Partnering with developers to accelerate the full software lifecycle—from modernizing
+                    legacy systems to shipping new features—using intelligent AI agents.</p>
+                <p>DevXintel is the first AI-native engineering platform that automates the entire software lifecycle
+                    using specialized AI agents, powered by a transparent token-based pricing model.</p>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number">30+</div>
+                        <div class="stat-label">AI Agents</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Pilot Customers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">$200K</div>
+                        <div class="stat-label">Seed Round</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem;">
+                    <button class="btn" onclick="goToSlide(2)">Explore Our Model <i
+                            class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Slide 2: The Problem -->
-        <div class="slide" id="slide2">
+        <section class="slide" id="slide2">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-2"></div>
             <div class="slide-content">
-                <h2>The Problem</h2>
-                <ul class="problem-list">
-                    <li><strong>Fragmentation:</strong> Startups juggle multiple, disconnected tools like GitHub, Jira,
-                        and Jenkins.</li>
-                    <li><strong>Manual Inefficiency:</strong> Code reviews, test creation, and requirement validation
-                        are slow and prone to human error.</li>
-                    <li><strong>High Costs:</strong> Hiring individual Project Managers, Business Analysts, Developers,
-                        Quality Assurance, and DevOps Engineers is expensive.</li>
-                    <li><strong>Lack of Integration:</strong> No single AI platform exists to manage the entire software
-                        development lifecycle.</li>
-                    <li><strong>Legacy Code Neglect:</strong> Existing platforms offer poor support for improving and
-                        integrating older projects.</li>
-                </ul>
-            </div>
-        </div>
+                <div class="section-header">
+                    <h2>The $500B Development Crisis</h2>
+                    <p>Traditional software development is broken, creating massive inefficiencies</p>
+                </div>
 
-        <!-- Slide 3: The Solution -->
-        <div class="slide" id="slide3">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3>Time-Consuming</h3>
+                        <p>Months or years from concept to deployment with countless delays that slow innovation.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <h3>Prohibitively Expensive</h3>
+                        <p>High costs for development teams and infrastructure strain budgets of all sizes.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Talent Shortage</h3>
+                        <p>Critical shortage of specialized developers creates bottlenecks and limits innovation.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h3>Complex Pricing Models</h3>
+                        <p>Opaque SaaS pricing with hidden costs and unpredictable billing cycles.</p>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 3rem;">
+                    <p style="font-size: 1.3rem; color: var(--accent); font-weight: 600;">70% of software projects are
+                        delivered late or over budget, costing businesses billions annually.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: MVP Demo -->
+        <section class="slide" id="slide3">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-3"></div>
             <div class="slide-content">
-                <h2>The Solution</h2>
-                <div class="solution-grid">
-                    <div class="solution-column">
-                        <h3>Minimum Viable Product (Available Today)</h3>
-                        <ul>
-                            <li>AI-Powered Code Review for new and legacy code</li>
-                            <li>Automated generation of test cases and functional test scripts</li>
-                            <li>Intelligent, manual-like test reporting</li>
-                            <li>Cross-verification of code against requirements</li>
-                            <li>Comprehensive code quality reports</li>
+                <div class="section-header">
+                    <h2>MVP Demo</h2>
+                    <p class="tagline">See our platform in action</p>
+                </div>
+
+                <div class="mvp-video-container">
+                    <!-- Replace with your actual MVP video -->
+                    <!-- <div class="video-placeholder">
+                        <i class="fas fa-play-circle"></i>
+                        <h3>DevXintel MVP Demo</h3>
+                        <p>Replace this placeholder with your actual MVP video</p>
+                    </div> -->
+
+                    <video id="mvpVideo" class="mvp-video" controls>
+                        <source src="./mvp.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+
+                </div>
+
+                <div class="grid" style="margin-top: 3rem;">
+                    <div class="card">
+                        <h3>Key MVP Features</h3>
+                        <ul class="feature-list">
+                            <li>Code Review - Do the code review for the complete application</li>
+                            <li>Test case Generation - Writes test case by understanding the application</li>
+                            <li>Test script generator - It generate the test script for the code functionality that we write</li>
+                            <li>Test Report - It work as a manual testor and generate report for the complete application</li>
+                            <li>Dashboard - It will show the points and a detailed code issues</li>
                         </ul>
                     </div>
-                    <div class="solution-column">
-                        <h3>Future Vision</h3>
-                        <ul>
-                            <li>An all-in-one AI assistant for Project Management, Business Analysis, Software
-                                Development, Quality Assurance, DevOps, and Customer Support</li>
-                            <li>The definitive AI Startup Operating System for managing both new and existing projects
-                                seamlessly</li>
+                    <div class="card">
+                        <h3>What Our Pilot Customers Say</h3>
+                        <p>"The platform make our mvp ready to production by suggesting the perfect industrial ready code with its code review and test report."</p>
+                        <p style="margin-top: 1.5rem; color: var(--accent); font-weight: 600;">- Saple.ai Team</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Enhanced Visual Workflow Demo -->
+        <section class="slide" id="slide4">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-4"></div>
+            <div class="slide-content">
+                <div class="section-header">
+                    <h2>DevXintel Agent Ecosystem</h2>
+                    <p class="tagline">Complete AI-powered software development lifecycle</p>
+                </div>
+
+                <div class="workflow-container">
+                    <div class="workflow-tabs">
+                        <button class="workflow-tab active" onclick="switchWorkflow('new')">New Projects</button>
+                        <button class="workflow-tab" onclick="switchWorkflow('existing')">Existing Projects</button>
+                        <button class="workflow-tab" onclick="switchWorkflow('agents')">Agent Matrix</button>
+                    </div>
+
+                    <!-- New Projects Workflow -->
+                    <div class="workflow-content active" id="new-workflow">
+                        <div class="workflow-diagram enhanced">
+                            <!-- Phase 1: Idea & Product Development -->
+                            <div class="workflow-phase">
+                                <div class="phase-header">
+                                    <div class="phase-icon">
+                                        <i class="fas fa-lightbulb"></i>
+                                    </div>
+                                    <div class="phase-title">
+                                        <h3>Phase 1: Idea & Product Development</h3>
+                                        <p>Convert ideas into structured requirements</p>
+                                    </div>
+                                    <div class="monitoring-badge">
+                                        <span class="monitoring-label">Monitored by</span>
+                                        <span class="agent-badge monitoring">Product Lead Agent</span>
+                                    </div>
+                                </div>
+
+                                <div class="agent-grid">
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-brain"></i>
+                                        </div>
+                                        <h4>Product AI Agent</h4>
+                                        <p>Brainstorms with user, researches market and competitors</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: FRD Draft</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </div>
+                                        <h4>Requirement Definition Agent</h4>
+                                        <p>Converts discussions into Functional Requirement Documents</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Final FRD</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-calculator"></i>
+                                        </div>
+                                        <h4>Feasibility & Estimation Agent</h4>
+                                        <p>Estimates project scope, cloud costs, third-party APIs</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Cost Analysis</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card optional">
+                                        <div class="agent-icon secondary">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <h4>Competitive & Regulatory Compliance Agent</h4>
+                                        <p>Ensures product meets legal, privacy, and industry regulations</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Compliance Report</span>
+                                        </div>
+                                        <div class="optional-badge">Optional</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="phase-connector">
+                                <div class="connector-line"></div>
+                                <div class="connector-arrow">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                            </div>
+
+                            <!-- Phase 2: Design & User Experience -->
+                            <div class="workflow-phase">
+                                <div class="phase-header">
+                                    <div class="phase-icon">
+                                        <i class="fas fa-palette"></i>
+                                    </div>
+                                    <div class="phase-title">
+                                        <h3>Phase 2: Design & User Experience</h3>
+                                        <p>Define user flow, UI/UX, and behavioral validation</p>
+                                    </div>
+                                    <div class="monitoring-badge">
+                                        <span class="monitoring-label">Monitored by</span>
+                                        <span class="agent-badge monitoring">Design Lead Agent</span>
+                                    </div>
+                                </div>
+
+                                <div class="agent-grid">
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-mind"></i>
+                                        </div>
+                                        <h4>Psychology / Behavioral Agent</h4>
+                                        <p>Designs interactions based on human behavior patterns</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Behavior Patterns</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-project-diagram"></i>
+                                        </div>
+                                        <h4>UX Flow Agent</h4>
+                                        <p>Defines navigation and user journeys</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: User Flow Diagrams</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-paint-brush"></i>
+                                        </div>
+                                        <h4>UI Design Agent</h4>
+                                        <p>Creates wireframes, mockups, and visual designs</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: UI Mockups</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <h4>Feedback & Approval Agent</h4>
+                                        <p>Captures step-by-step user feedback for confirmation</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Approval Status</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card optional">
+                                        <div class="agent-icon secondary">
+                                            <i class="fas fa-universal-access"></i>
+                                        </div>
+                                        <h4>Accessibility & Localization Agent</h4>
+                                        <p>Ensures accessibility compliance and multi-language support</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Compliance Report</span>
+                                        </div>
+                                        <div class="optional-badge">Optional</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Continue button for more phases -->
+                            <div class="continue-section">
+                                <button class="btn-outline" onclick="switchWorkflow('agents')">
+                                    View All 8 Phases & 30+ Agents <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="workflow-stats">
+                            <div class="stat-card">
+                                <div class="stat-number">8</div>
+                                <div class="stat-label">Development Phases</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">30+</div>
+                                <div class="stat-label">Specialized Agents</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">7</div>
+                                <div class="stat-label">Monitoring Agents</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">70%</div>
+                                <div class="stat-label">Faster Delivery</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Existing Projects Workflow -->
+                    <div class="workflow-content" id="existing-workflow">
+                        <div class="workflow-diagram enhanced">
+                            <!-- Repository Integration -->
+                            <div class="workflow-phase">
+                                <div class="phase-header">
+                                    <div class="phase-icon">
+                                        <i class="fas fa-code-branch"></i>
+                                    </div>
+                                    <div class="phase-title">
+                                        <h3>Repository Integration & Analysis</h3>
+                                        <p>Understand existing codebase and identify requirements</p>
+                                    </div>
+                                </div>
+
+                                <div class="agent-grid">
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        <h4>Legacy Code Understanding Agent</h4>
+                                        <p>Analyzes existing codebases for updates and refactoring</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Code Analysis</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-tasks"></i>
+                                        </div>
+                                        <h4>Tech Lead Agent</h4>
+                                        <p>Supervises legacy code analysis and task identification</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Task Breakdown</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="phase-connector">
+                                <div class="connector-line"></div>
+                                <div class="connector-arrow">
+                                    <i class="fas fa-arrow-down"></i>
+                                </div>
+                            </div>
+
+                            <!-- Development & Updates -->
+                            <div class="workflow-phase">
+                                <div class="phase-header">
+                                    <div class="phase-icon">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </div>
+                                    <div class="phase-title">
+                                        <h3>Development & Updates</h3>
+                                        <p>Implement changes with minimal disruption</p>
+                                    </div>
+                                </div>
+
+                                <div class="agent-grid">
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-code"></i>
+                                        </div>
+                                        <h4>Module Split Agent</h4>
+                                        <p>Breaks tasks into manageable units</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Module Plan</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-bolt"></i>
+                                        </div>
+                                        <h4>Code Generation Agent</h4>
+                                        <p>Writes production-ready code from FRD and design</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Generated Code</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-plus-circle"></i>
+                                        </div>
+                                        <h4>Feature Update Agent</h4>
+                                        <p>Adds new features to existing codebase</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Feature Implementation</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card">
+                                        <div class="agent-icon primary">
+                                            <i class="fas fa-bug"></i>
+                                        </div>
+                                        <h4>Bug Fix Agent</h4>
+                                        <p>Detects and resolves issues in existing code</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Bug Fixes</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="agent-card optional">
+                                        <div class="agent-icon secondary">
+                                            <i class="fas fa-file-code"></i>
+                                        </div>
+                                        <h4>Code Standardization Agent</h4>
+                                        <p>Enforces coding style and best practices</p>
+                                        <div class="agent-metrics">
+                                            <span class="metric">Output: Standardized Code</span>
+                                        </div>
+                                        <div class="optional-badge">Optional</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Continue button for more phases -->
+                            <div class="continue-section">
+                                <button class="btn-outline" onclick="switchWorkflow('agents')">
+                                    View Complete Legacy Workflow <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="workflow-stats">
+                            <div class="stat-card">
+                                <div class="stat-number">60%</div>
+                                <div class="stat-label">Faster Updates</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">Zero</div>
+                                <div class="stat-label">Breaking Changes</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">100%</div>
+                                <div class="stat-label">Code Understanding</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agent Matrix View -->
+                    <div class="workflow-content" id="agents-workflow">
+                        <div class="agent-matrix">
+                            <h3 style="text-align: center; margin-bottom: 2rem;">Complete Agent Matrix (30+ Specialized
+                                Agents)</h3>
+
+                            <div class="matrix-category">
+                                <h4><i class="fas fa-lightbulb"></i> Product Development Agents (5)</h4>
+                                <div class="matrix-grid">
+                                    <div class="matrix-item primary">Product AI Agent</div>
+                                    <div class="matrix-item primary">Requirement Definition Agent</div>
+                                    <div class="matrix-item primary">Feasibility & Estimation Agent</div>
+                                    <div class="matrix-item optional">Competitive & Regulatory Compliance Agent</div>
+                                    <div class="matrix-item monitoring">Product Lead Agent (Monitoring)</div>
+                                </div>
+                            </div>
+
+                            <div class="matrix-category">
+                                <h4><i class="fas fa-palette"></i> Design & UX Agents (6)</h4>
+                                <div class="matrix-grid">
+                                    <div class="matrix-item primary">Psychology / Behavioral Agent</div>
+                                    <div class="matrix-item primary">UX Flow Agent</div>
+                                    <div class="matrix-item primary">UI Design Agent</div>
+                                    <div class="matrix-item primary">Feedback & Approval Agent</div>
+                                    <div class="matrix-item optional">Accessibility & Localization Agent</div>
+                                    <div class="matrix-item monitoring">Design Lead Agent (Monitoring)</div>
+                                </div>
+                            </div>
+
+                            <div class="matrix-category">
+                                <h4><i class="fas fa-layer-group"></i> Architecture & Technology Agents (4)</h4>
+                                <div class="matrix-grid">
+                                    <div class="matrix-item primary">Tech Stack Selection Agent</div>
+                                    <div class="matrix-item primary">Cloud Architecture Agent</div>
+                                    <div class="matrix-item primary">API Integration Agent</div>
+                                    <div class="matrix-item optional">Security & Compliance Agent</div>
+                                    <div class="matrix-item monitoring">Architect Lead Agent (Monitoring)</div>
+                                </div>
+                            </div>
+
+                            <div class="matrix-category">
+                                <h4><i class="fas fa-code"></i> Development & Coding Agents (6)</h4>
+                                <div class="matrix-grid">
+                                    <div class="matrix-item primary">Module Split Agent</div>
+                                    <div class="matrix-item primary">Code Generation Agent</div>
+                                    <div class="matrix-item primary">Legacy Code Understanding Agent</div>
+                                    <div class="matrix-item primary">Feature Update Agent</div>
+                                    <div class="matrix-item primary">Bug Fix Agent</div>
+                                    <div class="matrix-item optional">Code Standardization Agent</div>
+                                    <div class="matrix-item monitoring">Tech Lead Agent (Monitoring)</div>
+                                </div>
+                            </div>
+
+                            <div class="matrix-category">
+                                <h4><i class="fas fa-vial"></i> Quality Assurance & Testing Agents (7)</h4>
+                                <div class="matrix-grid">
+                                    <div class="matrix-item primary">Code Review Agent</div>
+                                    <div class="matrix-item primary">Unit Test Generation Agent</div>
+                                    <div class="matrix-item primary">Test Script Agent</div>
+                                    <div class="matrix-item primary">Manual Testing Agent</div>
+                                    <div class="matrix-item primary">Regression Testing Agent</div>
+                                    <div class="matrix-item optional">Performance & Load Testing Agent</div>
+                                    <div class="matrix-item monitoring">QA Lead Agent (Monitoring)</div>
+                                </div>
+                            </div>
+
+                            <div class="matrix-category">
+                                <h4><i class="fas fa-rocket"></i> Deployment & Operations Agents (5)</h4>
+                                <div class="matrix-grid">
+                                    <div class="matrix-item primary">CI/CD Pipeline Agent</div>
+                                    <div class="matrix-item primary">Deployment Assistant Agent</div>
+                                    <div class="matrix-item primary">Monitoring Agent</div>
+                                    <div class="matrix-item optional">Rollback & Recovery Agent</div>
+                                    <div class="matrix-item monitoring">Operations Lead Agent (Monitoring)</div>
+                                </div>
+                            </div>
+
+                            <div class="matrix-category">
+                                <h4><i class="fas fa-book"></i> Documentation & Knowledge Agents (5)</h4>
+                                <div class="matrix-grid">
+                                    <div class="matrix-item primary">Documentation Agent</div>
+                                    <div class="matrix-item primary">Feedback Loop Agent</div>
+                                    <div class="matrix-item primary">Knowledge Base Agent</div>
+                                    <div class="matrix-item optional">User Training / Onboarding Agent</div>
+                                    <div class="matrix-item monitoring">Documentation Lead Agent (Monitoring)</div>
+                                </div>
+                            </div>
+
+                            <div class="matrix-category">
+                                <h4><i class="fas fa-chart-line"></i> Post-Deployment Agents (1)</h4>
+                                <div class="matrix-grid">
+                                    <div class="matrix-item optional">Analytics & Insights Agent</div>
+                                </div>
+                            </div>
+
+                            <div class="matrix-legend">
+                                <div class="legend-item">
+                                    <span class="legend-color primary"></span>
+                                    <span>Core Agent (Required)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color optional"></span>
+                                    <span>Optional Agent</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color monitoring"></span>
+                                    <span>Monitoring Agent</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid" style="margin-top: 3rem;">
+                    <div class="card">
+                        <h3>Real-Time Token Tracking</h3>
+                        <p>Every agent operation consumes tokens, providing complete cost transparency:</p>
+                        <div class="token-example">
+                            <div class="token-operation">
+                                <span class="operation-name">Code Generation Agent</span>
+                                <span class="token-cost">2000–1,000 tokens</span>
+                            </div>
+                            <div class="token-operation">
+                                <span class="operation-name">UI Design Agent</span>
+                                <span class="token-cost">1,000–5,000+ tokens</span>
+                            </div>
+                            <div class="token-operation">
+                                <span class="operation-name">QA Testing Agent</span>
+                                <span class="token-cost">300–800 tokens</span>
+                            </div>
+                            <div class="token-total">
+                                <span class="total-label">Project Total:</span>
+                                <span class="total-cost">~50,000–500,000 tokens</span>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--accent);">
+                            <i class="fas fa-info-circle"></i> Average web application: 20k-1M tokens
+                        </p>
+                    </div>
+                    <div class="card">
+                        <h3>Monitoring & Quality Assurance</h3>
+                        <p>Each phase has dedicated monitoring agents ensuring quality:</p>
+                        <ul class="feature-list">
+                            <li><strong>Quality Gates:</strong> Each phase must pass monitoring agent approval</li>
+                            <li><strong>Continuous Feedback:</strong> Real-time user input at every step</li>
+                            <li><strong>Knowledge Retention:</strong> All learnings stored for future projects</li>
+                            <li><strong>Automated Rollback:</strong> Failed deployments automatically reverted</li>
+                        </ul>
+                        <div
+                            style="margin-top: 1.5rem; padding: 1rem; background: rgba(0, 102, 255, 0.1); border-radius: var(--radius);">
+                            <p style="margin: 0; color: var(--primary-light); font-size: 0.9rem;">
+                                <i class="fas fa-shield-alt"></i> <strong>Enterprise Security:</strong> All agents
+                                operate within your secure environment with end-to-end encryption
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: Architecture -->
+        <section class="slide" id="slide5">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-5"></div>
+            <div class="slide-content">
+                <div class="section-header">
+                    <h2>Platform Architecture</h2>
+                    <p class="tagline">Scalable micro-agent architecture with token economy</p>
+                </div>
+
+                <div class="architecture-container">
+                    <!-- Replace with your actual architecture diagram -->
+                    <!-- <div class="architecture-placeholder">
+                        <i class="fas fa-project-diagram"></i>
+                        <h3>DevXintel Architecture Diagram</h3>
+                        <p>Click to zoom. Replace with your actual architecture image.</p>
+                    </div> -->
+
+                    <img src="./architecture.PNG" alt="DevXintel Platform Architecture" class="zoomable-image"
+                        id="architectureImage">
+
+                </div>
+
+                <div class="grid" style="margin-top: 3rem;">
+                    <div class="card">
+                        <h3>Core Components</h3>
+                        <ul class="feature-list">
+                            <li><strong>Agent Orchestrator:</strong> Coordinates 30+ specialized AI agents</li>
+                            <li><strong>Token Manager:</strong> Handles billing and token allocation</li>
+                            <li><strong>Knowledge Base:</strong> Stores project learnings and templates</li>
+                            <li><strong>Security Layer:</strong> End-to-end encryption for enterprise tiers</li>
+                            <li><strong>API Gateway:</strong> Integrates with external tools and services</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Technical Highlights</h3>
+                        <ul class="feature-list">
+                            <li>Microservices architecture for scalability</li>
+                            <li>Real-time agent communication</li>
+                            <li>Multi-tenant isolation</li>
+                            <li>Automated quality gates</li>
+                            <li>Continuous learning system</li>
                         </ul>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Slide 4: Competitive Comparison -->
-        <div class="slide" id="slide4">
+        <!-- Slide 6: Hosting Options -->
+        <section class="slide" id="slide6">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-6"></div>
             <div class="slide-content">
-                <h2>Competitive Comparison</h2>
-                <table class="comparison-table">
-                    <tr>
-                        <th>Feature</th>
-                        <th>Replit / Coder / Lovable</th>
-                        <th>devXintel</th>
-                    </tr>
-                    <tr>
-                        <td>Online Code Editor & Collaboration</td>
-                        <td><i class="fas fa-check check"></i></td>
-                        <td><i class="fas fa-check check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>Deployment & Real-Time Execution</td>
-                        <td><i class="fas fa-check check"></i></td>
-                        <td><i class="fas fa-check check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>AI-Powered Code Review</td>
-                        <td><i class="fas fa-times cross"></i></td>
-                        <td><i class="fas fa-check check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>Automated Test & Script Generation</td>
-                        <td><i class="fas fa-times cross"></i></td>
-                        <td><i class="fas fa-check check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>Requirement vs. Code Cross-Check</td>
-                        <td><i class="fas fa-times cross"></i></td>
-                        <td><i class="fas fa-check check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>Full Quality & Test Reports</td>
-                        <td><i class="fas fa-times cross"></i></td>
-                        <td><i class="fas fa-check check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>Support for Legacy Projects</td>
-                        <td><i class="fas fa-times cross"></i></td>
-                        <td><i class="fas fa-check check"></i></td>
-                    </tr>
-                    <tr>
-                        <td>All-in-One Startup Assistant</td>
-                        <td><i class="fas fa-times cross"></i></td>
-                        <td><i class="fas fa-check check"></i></td>
-                    </tr>
-                </table>
-                <p><strong>Key Differentiator:</strong> While competitors focus on coding environments, devXintel
-                    provides intelligent automation across the entire lifecycle for both new and existing projects.</p>
-            </div>
-        </div>
+                <div class="section-header">
+                    <h2>Flexible Hosting Options</h2>
+                    <p class="tagline">Choose the deployment model that fits your security and budget needs</p>
+                </div>
 
-        <!-- Slide 5: Market Opportunity -->
-        <div class="slide" id="slide5">
-            <div class="slide-content">
-                <h2>Market Opportunity</h2>
-                <div class="market-stats">
-                    <div class="stat">
-                        <div class="stat-number">$200B+</div>
-                        <div>Projected AI in Software Development Market by 2030</div>
+                <div class="hosting-table-container">
+                    <table class="hosting-table">
+                        <thead>
+                            <tr>
+                                <th>Hosting Type</th>
+                                <th>Server</th>
+                                <th>Database</th>
+                                <th>AI Model</th>
+                                <th>Payment Type</th>
+                                <th>Pricing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="hosting-type">Client-managed</td>
+                                <td><span class="hosting-badge badge-client">Client</span></td>
+                                <td><span class="hosting-badge badge-client">Client</span></td>
+                                <td><span class="hosting-badge badge-client">Client</span></td>
+                                <td>Advance</td>
+                                <td class="pricing-highlight">$25 / month</td>
+                            </tr>
+                            <tr>
+                                <td class="hosting-type">Hybrid (Client DB & Model)</td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td><span class="hosting-badge badge-client">Client</span></td>
+                                <td><span class="hosting-badge badge-client">Client</span></td>
+                                <td>Advance</td>
+                                <td class="pricing-highlight">$0.015 / 1K tokens</td>
+                            </tr>
+                            <tr>
+                                <td class="hosting-type">Hybrid (Client Model)</td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td><span class="hosting-badge badge-client">Client</span></td>
+                                <td>Advance</td>
+                                <td class="pricing-highlight">$0.02 / 1K tokens</td>
+                            </tr>
+                            <tr>
+                                <td class="hosting-type">Fully Managed by DevXIntel</td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td>Advance</td>
+                                <td class="pricing-highlight">$0.04 / 1K tokens</td>
+                            </tr>
+                            <tr>
+                                <td class="hosting-type">Fully Managed – No Advance</td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td><span class="hosting-badge badge-devxintel">DevXIntel</span></td>
+                                <td>No Advance</td>
+                                <td>
+                                    <div class="pricing-highlight">200K free tokens / day</div>
+                                    <div>then $0.075 / 1K tokens</div>
+                                    <div class="pricing-note">*Data may be used by DevXIntel for training and quality
+                                        improvement.</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid" style="margin-top: 3rem;">
+                    <div class="card hosting-card recommended">
+                        <div class="recommended-badge">RECOMMENDED</div>
+                        <h3>Hybrid (Client DB & Model)</h3>
+                        <p>Best balance of security, control, and convenience. Maintain your data and AI models while
+                            leveraging our infrastructure.</p>
+                        <div class="hosting-features">
+                            <h4>Ideal For:</h4>
+                            <ul class="feature-list">
+                                <li>Enterprises with data privacy requirements</li>
+                                <li>Companies with proprietary AI models</li>
+                                <li>Organizations needing full data control</li>
+                                <li>Teams with existing infrastructure</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="stat">
-                        <div class="stat-number">$1T+</div>
-                        <div>Software Development Industry Value</div>
+
+                    <div class="card hosting-card">
+                        <h3>Fully Managed – No Advance</h3>
+                        <p>Perfect for testing, prototyping, and small projects. Get started immediately with no upfront
+                            payment.</p>
+                        <div class="hosting-features">
+                            <h4>Ideal For:</h4>
+                            <ul class="feature-list">
+                                <li>Startups and individual developers</li>
+                                <li>Proof of concept projects</li>
+                                <li>Testing and evaluation</li>
+                                <li>Small-scale applications</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <ul>
-                    <li><strong>Massive Growth:</strong> The global market for AI in Software Development is projected
-                        to exceed $200 Billion by 2030</li>
-                    <li><strong>High Demand:</strong> Increasing adoption of AI-powered tools like GitHub Copilot and
-                        Testim signals strong market readiness</li>
-                    <li><strong>Wide Audience:</strong> Ideal for startups, SMBs, and large enterprises focused on
-                        efficiency</li>
-                </ul>
             </div>
-        </div>
+        </section>
 
-        <!-- Slide 6: Product Demo -->
-        <div class="slide" id="slide6">
+        <!-- Slide 7: Token Business Model -->
+        <section class="slide" id="slide7">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-7"></div>
             <div class="slide-content">
-                <h2>Product Demo (MVP Snapshot)</h2>
-                <div class="demo-steps">
-                    <div class="demo-step">
-                        <div class="demo-step-number">1</div>
-                        <img src="./screenshot-1743960112152.png" alt="Upload Source Code" class="demo-step-image" />
-                        <h3>Upload Source Code</h3>
-                        <p>The AI reviews your new or legacy project</p>
-                    </div>
-                    <div class="demo-step">
-                        <div class="demo-step-number">2</div>
-                        <img src="./screenshot-1743961230607.png" alt="Automate Testing" class="demo-step-image" />
-                        <h3>Automate Testing</h3>
-                        <p>It generates test cases and automation scripts instantly</p>
-                    </div>
-                    <div class="demo-step">
-                        <div class="demo-step-number">3</div>
-                        <img src="./screenshot-1743961826403.png" alt="Cross-Check" class="demo-step-image" />
-                        <h3>Code Report</h3>
-                        <p>Code is validated against project requirements automatically</p>
-                    </div>
-                    <div class="demo-step">
-                        <div class="demo-step-number">4</div>
-                        <img src="./screenshot-1743961146296.png" alt="Generate Reports" class="demo-step-image" />
-                        <h3>Generate Reports</h3>
-                        <p>Receive detailed code quality and QA reports</p>
-                    </div>
+                <div class="section-header">
+                    <h2>Token-Based Business Model</h2>
+                    <p class="tagline">Transparent, usage-based pricing for all customer segments</p>
                 </div>
-                <ul>
-                    <li>Intuitive User Interface</li>
-                    <li>Full Automation</li>
-                    <li>Actionable Insights</li>
-                </ul>
-            </div>
-        </div>
 
-
-        <!-- Slide 7: Business Model -->
-        <div class="slide" id="slide7">
-            <div class="slide-content">
-                <h2>Business Model</h2>
-                <h3>Software-as-a-Service (SaaS) Subscriptions</h3>
-                <div class="pricing-tiers">
-                    <div class="pricing-tier">
-                        <div class="tier-name">Starter Plan</div>
-                        <p>For small development teams</p>
-                    </div>
-                    <div class="pricing-tier">
-                        <div class="tier-name">Growth Plan</div>
-                        <p>For mid-size startups</p>
-                    </div>
-                    <div class="pricing-tier">
-                        <div class="tier-name">Enterprise Plan</div>
-                        <p>For custom needs and integrations</p>
-                    </div>
-                </div>
-                <h3>Additional Revenue Streams</h3>
-                <ul>
-                    <li>Usage-Based Pricing for API calls</li>
-                    <li>Premium Add-ons: AI Assistants for DevOps, Business Analysis, and Project Management</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Slide 8: Competitive Landscape -->
-        <div class="slide" id="slide8">
-            <div class="slide-content">
-                <h2>Competitive Landscape</h2>
-                <div class="competitor-grid">
-                    <div class="competitor-item">
-                        <div class="competitor-name">GitHub Copilot</div>
-                        <p>Coding Assistance Only</p>
-                    </div>
-                    <div class="competitor-item">
-                        <div class="competitor-name">Testim / BrowserStack</div>
-                        <p>Test Automation Only</p>
-                    </div>
-                    <div class="competitor-item">
-                        <div class="competitor-name">Jira / Notion</div>
-                        <p>Project Management & Business Analysis Only</p>
-                    </div>
-                    <div class="competitor-item">
-                        <div class="competitor-name">ServiceNow</div>
-                        <p>Customer Support Solutions Only</p>
-                    </div>
-                </div>
-                <p><strong>The devXintel Advantage:</strong> A single, unified AI platform covering the entire startup
-                    workflow from Project Management to Customer Support for both new and existing projects.</p>
-            </div>
-        </div>
-
-        <!-- Slide 9: Traction -->
-        <div class="slide" id="slide9">
-            <div class="slide-content">
-                <h2>Traction</h2>
-                <ul>
-                    <li><strong>Minimum Viable Product is live</strong> with core AI modules for code review and QA
-                        automation</li>
-                    <li><strong>Positive early feedback</strong> gathered from 3 pilot startups</li>
-                </ul>
-                <div class="traction-logos">
-                    <div class="traction-logo">saple.ai</div>
-                    <div class="traction-logo">alazka</div>
-                    <div class="traction-logo">bloomi5</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Slide 10: Go-to-Market Strategy -->
-        <div class="slide" id="slide10">
-            <div class="slide-content">
-                <h2>Go-to-Market Strategy</h2>
-                <ul>
-                    <li><strong>Target Audience:</strong> Startups and SMBs looking for 40-60% cost savings</li>
-                    <li><strong>Marketing Channels:</strong>
-                        <ul>
-                            <li>Engaging with developer communities</li>
-                            <li>Targeted LinkedIn advertising campaigns</li>
-                            <li>Sponsoring and participating in hackathons and startup events</li>
-                            <li>Forming strategic partnerships with incubators</li>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <h3>How Tokens Work</h3>
+                        <p>Tokens represent usage of our AI agents. Purchase tokens in advance or use our free tier to
+                            get started.</p>
+                        <ul class="feature-list">
+                            <li>1 token ≈ 4 characters of English text</li>
+                            <li>Predictable, transparent billing</li>
+                            <li>No hidden fees or surprise charges</li>
+                            <li>Usage rolls over month to month</li>
                         </ul>
-                    </li>
-                    <li><strong>Model:</strong> A freemium model to drive user adoption and create a funnel for paid
-                        conversions</li>
-                </ul>
-            </div>
-        </div>
+                    </div>
 
-        <!-- Slide 11: Financial Projections -->
-        <div class="slide" id="slide11">
-            <div class="slide-content">
-                <h2>Financial Projections</h2>
-                <div class="market-stats">
-                    <div class="stat">
-                        <div class="stat-number">Year 2</div>
-                        <div>500 Paying Development Teams</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-number">Year 3</div>
-                        <div>1,000 Paying Development Teams</div>
-                    </div>
-                </div>
-                <div class="market-stats">
-                    <div class="stat">
-                        <div class="stat-number">Year 5</div>
-                        <div>50,000 Paying Development Teams plus Enterprise Deals</div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Cost Efficiency</h3>
+                        <p>Our token system provides significant cost savings compared to traditional development.</p>
+                        <ul class="feature-list">
+                            <li>Up to 70% cost reduction vs traditional development</li>
+                            <li>Pay only for what you use</li>
+                            <li>Volume discounts available</li>
+                            <li>No long-term contracts required</li>
+                        </ul>
                     </div>
                 </div>
 
+                <div style="text-align: center; margin-top: 3rem;">
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-number">70%</div>
+                            <div class="stat-label">Cost Savings</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">5x</div>
+                            <div class="stat-label">Faster Development</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Transparent Pricing</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Slide 12: Team -->
-        <div class="slide" id="slide12">
+        <!-- Slide 8: Traction & Customers -->
+        <section class="slide" id="slide8">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-8"></div>
             <div class="slide-content">
-                <h2>Team</h2>
-                <div class="team-members">
+                <div class="section-header">
+                    <h2>Early Traction & Validation</h2>
+                    <p class="tagline">Three pilot customers providing valuable feedback</p>
+                </div>
+
+                <div class="customer-logos">
+                    <div class="customer-logo">Saple.ai</div>
+                    <div class="customer-logo">Alazka.ai</div>
+                    <div class="customer-logo">Bloomi5</div>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>Product Validation</h3>
+                        <p>Our MVP is currently being tested by three early adopters who are providing crucial feedback
+                            to shape our product development.</p>
+                        <p style="margin-top: 1rem;"><strong>Current Focus:</strong> Product refinement and feature
+                            prioritization based on user feedback.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Feedback Highlights</h3>
+                        <ul class="feature-list">
+                            <li>70% reduction in development time for common tasks</li>
+                            <li>High code quality with minimal revisions needed</li>
+                            <li>Intuitive agent workflow requiring minimal training</li>
+                            <li>Token system provides cost predictability</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 3rem;">
+                    <p style="font-size: 1.2rem;">"The token-based model gives us complete control over our development
+                        costs while accessing enterprise-grade AI capabilities."</p>
+                    <p style="color: var(--accent); font-weight: 600; margin-top: 1rem;">- Early Adopter Feedback</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: The Team -->
+        <section class="slide" id="slide9">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-9"></div>
+            <div class="slide-content">
+                <div class="section-header">
+                    <h2>Our Expert Team</h2>
+                    <p class="tagline">Combining AI expertise with deep software architecture experience</p>
+                </div>
+
+                <div class="team-grid">
                     <div class="team-member">
-                        <img src="./RAHUL.jpg" alt="Rahul Muralee" class="member-photo" />
-
-                        <a href="https://www.linkedin.com/in/rahul-muralee/" target="_blank">
-                            <h3>🔗Rahul M</h3>
-                        </a>
-                        <p>Co-Founder & Full Stack Engineer</p>
-
+                        <div class="team-avatar">
+                            <img src="./RAHUL.jpg" alt="User" class="user-avatar" />
+                        </div>
+                        <div class="team-name">Rahul M</div>
+                        <div class="team-role">AI Full Stack Developer</div>
+                        <p>3 years of experience in AI development and full-stack engineering. Specialized in building
+                            scalable AI applications and microservices architecture.</p>
                     </div>
+
                     <div class="team-member">
-                        <img src="./IMRAN.jpg" alt="Imran Mansoori" class="member-photo" />
-                        <a href="https://www.linkedin.com/in/imranmansoori/" target="_blank">
-                            <h3>🔗Imran Mansoori</h3>
-                        </a>
-                        <p>Co-Founder & Software Architect</p>
+                        <div class="team-avatar">
+                            <img src="./IMRAN.jpg" alt="User" class="user-avatar" />
+                        </div>
+                        <div class="team-name">Imran Mansoori</div>
+                        <div class="team-role">Software Architect</div>
+                        <p>14 years of experience in software architecture and system design. Previously led development
+                            of enterprise-scale applications serving millions of users.</p>
                     </div>
                 </div>
-                <h3>Extended Team:</h3>
-                <p>Software Developers, R&D Specialists, UI/UX Designers, Data Scientists, Project Managers, and Quality
-                    Assurance Engineers.</p>
+
+                <div style="margin-top: 3rem;">
+                    <h3 style="text-align: center; margin-bottom: 2rem;">Advisory Support</h3>
+                    <div class="grid">
+                        <div class="card">
+                            <h4>Product Strategy</h4>
+                            <p>Advisors with experience in scaling developer tools and platform products.</p>
+                        </div>
+                        <div class="card">
+                            <h4>AI Research</h4>
+                            <p>Experts in machine learning and multi-agent systems guiding our technical direction.</p>
+                        </div>
+                        <div class="card">
+                            <h4>Go-to-Market</h4>
+                            <p>Professionals with experience in developer-focused product launches.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </section>
 
-
-        <!-- Slide 13: Funding Ask -->
-        <div class="slide" id="slide13">
+        <!-- Slide 10: Financial Projections -->
+        <section class="slide" id="slide10">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-10"></div>
             <div class="slide-content">
-                <h2>Funding Ask</h2>
-                <div style="display: flex; justify-content: center; align-items: center;">
-                    <div class="stat">
-                        <div class="stat-number">$200,000</div>
-                        <div>Seed Round</div>
-                    </div>
+                <div class="section-header">
+                    <h2>Financial Projections</h2>
+                    <p class="tagline">Path to profitability with scalable token economy</p>
                 </div>
-                <h3>Use of Funds:</h3>
-                <div class="funds-allocation">
-                    <div class="allocation-chart">
-                        <div class="allocation-center" style="font-size: 16px;">Funding Allocation</div>
-                    </div>
-                </div>
-                <ul>
-                    <li><strong>40%</strong> – Product Development</li>
-                    <li><strong>25%</strong> – AI & Machine Learning R&D</li>
-                    <li><strong>20%</strong> – Go-to-Market & Sales</li>
-                    <li><strong>10%</strong> – Cloud Infrastructure</li>
-                    <li><strong>5%</strong> – Legal & Operations</li>
-                </ul>
-            </div>
-        </div>
 
-        <!-- Slide 14: Vision & Call to Action -->
-        <div class="slide" id="slide14">
+                <div class="financial-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Year 1</th>
+                                <th>Year 2</th>
+                                <th>Year 3</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Monthly Active Users</td>
+                                <td>500</td>
+                                <td>5,000</td>
+                                <td>25,000</td>
+                            </tr>
+                            <tr>
+                                <td>Paying Customers</td>
+                                <td>50</td>
+                                <td>750</td>
+                                <td>5,000</td>
+                            </tr>
+                            <tr>
+                                <td>Annual Revenue</td>
+                                <td>$0 (Feedback Phase)</td>
+                                <td class="highlight">$500,000</td>
+                                <td class="highlight">$5,000,000</td>
+                            </tr>
+                            <tr>
+                                <td>Gross Margin</td>
+                                <td>N/A</td>
+                                <td>75%</td>
+                                <td>80%</td>
+                            </tr>
+                            <tr>
+                                <td>Customer Acquisition Cost</td>
+                                <td>$0 (Organic)</td>
+                                <td>$150</td>
+                                <td>$100</td>
+                            </tr>
+                            <tr>
+                                <td>Lifetime Value</td>
+                                <td>N/A</td>
+                                <td>$2,000</td>
+                                <td>$3,500</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid" style="margin-top: 3rem;">
+                    <div class="card">
+                        <h3>Revenue Streams</h3>
+                        <ul class="feature-list">
+                            <li><strong>Token Sales (80%):</strong> Primary revenue from token purchases across all
+                                tiers</li>
+                            <li><strong>Enterprise Services (15%):</strong> Custom deployments, training, and support
+                            </li>
+                            <li><strong>Add-ons (5%):</strong> BYODB and other premium features</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3>Key Assumptions</h3>
+                        <ul class="feature-list">
+                            <li>Average Professional user: $50/month in tokens</li>
+                            <li>Average Organization user: $200/month in tokens</li>
+                            <li>Average Enterprise customer: $1,000/month in tokens</li>
+                            <li>5% monthly organic growth from word-of-mouth</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Investment Ask -->
+        <section class="slide" id="slide11">
+            <div class="slide-bg"></div>
+            <div class="particles" id="particles-11"></div>
             <div class="slide-content">
-                <h2>Vision & Call to Action</h2>
-                <div class="vision-text">
-                    To become the definitive AI Operating System for Startups.
+                <div class="section-header">
+                    <h2>Investment Opportunity</h2>
+                    <p class="tagline">$200K Seed Round to accelerate growth</p>
                 </div>
-                <div
-                    style="display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 40px;">
-                    www.devxintel.com | devxintel@gmail.com | 9566832102
 
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-search-dollar"></i>
+                        </div>
+                        <h3>Use of Funds</h3>
+                        <ul class="feature-list">
+                            <li><strong>Product Development (40%):</strong> Expand agent capabilities and platform
+                                features</li>
+                            <li><strong>Team Expansion (30%):</strong> Hire additional AI engineers and UX designers
+                            </li>
+                            <li><strong>Marketing (20%):</strong> Developer outreach and content creation</li>
+                            <li><strong>Operational Costs (10%):</strong> Infrastructure and administrative expenses
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3>Milestones</h3>
+                        <ul class="feature-list">
+                            <li>Launch public beta with all hosting options</li>
+                            <li>Grow to 1,000 monthly active users</li>
+                            <li>Convert pilot customers to paying users</li>
+                            <li>Develop 10 additional specialized agents</li>
+                            <li>Establish partnerships with 3 developer communities</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem;">
+                    <h3 style="text-align: center; margin-bottom: 2rem;">Why Invest in DevXintel?</h3>
+                    <div class="grid">
+                        <div class="card">
+                            <h4>First-Mover Advantage</h4>
+                            <p>First comprehensive AI development platform with flexible hosting and token-based
+                                pricing.</p>
+                        </div>
+                        <div class="card">
+                            <h4>Proven Technology</h4>
+                            <p>MVP already delivering value to pilot customers with positive feedback.</p>
+                        </div>
+                        <div class="card">
+                            <h4>Massive TAM</h4>
+                            <p>$500B+ global software development market with clear pain points.</p>
+                        </div>
+                        <div class="card">
+                            <h4>Scalable Business Model</h4>
+                            <p>Token economy creates predictable, recurring revenue with high margins.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-info">
+                    <h3>Join the AI Development Revolution</h3>
+                    <p>Contact us to learn more about our vision and investment opportunity</p>
+                    <div style="margin-top: 2rem;">
+                        <button class="btn"><i class="fas fa-envelope"></i> Contact Team</button>
+                    </div>
+                    <p style="margin-top: 2rem; font-size: 1rem;">Rahul M & Imran Mansoori | devxintel@gmail.com</p>
                 </div>
             </div>
+        </section>
+    </div>
+
+    <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn" onclick="prevSlide()">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="slide-indicators" id="slideIndicators">
+            <!-- Indicators will be generated by JavaScript -->
         </div>
 
-        <div class="arrow-nav">
-            <button class="arrow-btn" id="prev-btn"><i class="fas fa-chevron-left"></i></button>
-            <button class="arrow-btn" id="next-btn"><i class="fas fa-chevron-right"></i></button>
-        </div>
-
-        <div class="navigation">
-            <button class="nav-btn active" data-slide="1"></button>
-            <button class="nav-btn" data-slide="2"></button>
-            <button class="nav-btn" data-slide="3"></button>
-            <button class="nav-btn" data-slide="4"></button>
-            <button class="nav-btn" data-slide="5"></button>
-            <button class="nav-btn" data-slide="6"></button>
-            <button class="nav-btn" data-slide="7"></button>
-            <button class="nav-btn" data-slide="8"></button>
-            <button class="nav-btn" data-slide="9"></button>
-            <button class="nav-btn" data-slide="10"></button>
-            <button class="nav-btn" data-slide="11"></button>
-            <button class="nav-btn" data-slide="12"></button>
-            <button class="nav-btn" data-slide="13"></button>
-            <button class="nav-btn" data-slide="14"></button>
-        </div>
+        <button class="nav-btn" id="nextBtn" onclick="nextSlide()">
+            <i class="fas fa-chevron-right"></i>
+        </button>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const slides = document.querySelectorAll('.slide');
-            const navButtons = document.querySelectorAll('.nav-btn');
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            let currentSlide = 0;
+        // Initialize slides
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
 
-            // Function to show a specific slide
-            function showSlide(index) {
-                // Hide all slides
-                slides.forEach(slide => {
-                    slide.classList.remove('active');
+        // Create particles for each slide
+        function createParticles(containerId, count) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+
+                // Random properties
+                const size = Math.random() * 10 + 2;
+                const left = Math.random() * 100;
+                const animationDuration = Math.random() * 30 + 15;
+                const animationDelay = Math.random() * 10;
+                const opacity = Math.random() * 0.5 + 0.1;
+
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${left}%`;
+                particle.style.animationDuration = `${animationDuration}s`;
+                particle.style.animationDelay = `${animationDelay}s`;
+                particle.style.opacity = opacity;
+
+                // Random color from theme
+                const colors = ['#0066FF', '#8B46FF', '#00D4AA'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.background = color;
+
+                container.appendChild(particle);
+            }
+        }
+
+        // Create slide indicators
+        function createIndicators() {
+            const indicatorsContainer = document.getElementById('slideIndicators');
+
+            for (let i = 0; i < totalSlides; i++) {
+                const indicator = document.createElement('div');
+                indicator.classList.add('slide-indicator');
+                if (i === 0) indicator.classList.add('active');
+
+                indicator.addEventListener('click', () => {
+                    goToSlide(i);
                 });
 
-                // Remove active class from all nav buttons
-                navButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                });
+                indicatorsContainer.appendChild(indicator);
+            }
+        }
 
-                // Show the selected slide
-                slides[index].classList.add('active');
+        // Update progress bar
+        function updateProgressBar() {
+            const progressBar = document.getElementById('progressBar');
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
 
-                // Activate the corresponding nav button
-                navButtons[index].classList.add('active');
+        // Update slide indicators
+        function updateIndicators() {
+            const indicators = document.querySelectorAll('.slide-indicator');
+            indicators.forEach((indicator, index) => {
+                if (index === currentSlide) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
 
-                // Update currentSlide
-                currentSlide = index;
+        // Go to specific slide
+        function goToSlide(slideIndex) {
+            if (slideIndex < 0 || slideIndex >= totalSlides) return;
+
+            // Update current slide
+            const prevSlide = currentSlide;
+            currentSlide = slideIndex;
+
+            // Update classes for animation
+            slides[prevSlide].classList.remove('active');
+
+            if (slideIndex > prevSlide) {
+                slides[prevSlide].classList.add('prev');
+                slides[slideIndex].classList.add('next');
+            } else {
+                slides[prevSlide].classList.add('next');
+                slides[slideIndex].classList.add('prev');
             }
 
-            // Event listeners for navigation buttons
-            navButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const slideIndex = parseInt(this.getAttribute('data-slide')) - 1;
-                    showSlide(slideIndex);
+            setTimeout(() => {
+                slides[prevSlide].classList.remove('prev', 'next');
+                slides[slideIndex].classList.remove('prev', 'next');
+                slides[slideIndex].classList.add('active');
+
+                updateProgressBar();
+                updateIndicators();
+            }, 50);
+        }
+
+        // Next slide
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                goToSlide(currentSlide + 1);
+            }
+        }
+
+        // Previous slide
+        function prevSlide() {
+            if (currentSlide > 0) {
+                goToSlide(currentSlide - 1);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Swipe navigation for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+
+            if (touchEndX < touchStartX - swipeThreshold) {
+                nextSlide();
+            }
+
+            if (touchEndX > touchStartX + swipeThreshold) {
+                prevSlide();
+            }
+        }
+
+        // Zoom functionality for architecture diagram
+        function initZoom() {
+            const zoomOverlay = document.getElementById('zoomOverlay');
+            const closeZoom = document.getElementById('closeZoom');
+            const zoomedImage = document.getElementById('zoomedImage');
+
+            // For the placeholder, we'll add a click event to show a message
+            const architecturePlaceholder = document.querySelector('.architecture-placeholder');
+            if (architecturePlaceholder) {
+                architecturePlaceholder.addEventListener('click', () => {
+                    alert('Replace this placeholder with your actual architecture diagram image. Then update the HTML to use the zoomable-image class.');
                 });
+            }
+
+            // For when you add your actual image
+            const architectureImage = document.getElementById('architectureImage');
+            if (architectureImage) {
+                architectureImage.addEventListener('click', () => {
+                    zoomedImage.src = architectureImage.src;
+                    zoomOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            closeZoom.addEventListener('click', () => {
+                zoomOverlay.classList.remove('active');
+                document.body.style.overflow = '';
             });
 
-            // Event listeners for arrow buttons
-            prevBtn.addEventListener('click', function () {
-                let newIndex = currentSlide - 1;
-                if (newIndex < 0) newIndex = slides.length - 1;
-                showSlide(newIndex);
-            });
-
-            nextBtn.addEventListener('click', function () {
-                let newIndex = currentSlide + 1;
-                if (newIndex >= slides.length) newIndex = 0;
-                showSlide(newIndex);
-            });
-
-            // Keyboard navigation
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'ArrowLeft') {
-                    prevBtn.click();
-                } else if (e.key === 'ArrowRight') {
-                    nextBtn.click();
+            zoomOverlay.addEventListener('click', (e) => {
+                if (e.target === zoomOverlay) {
+                    zoomOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
                 }
             });
+        }
 
-            // Swipe support for touch devices
-            let touchStartX = 0;
-            let touchEndX = 0;
-
-            document.addEventListener('touchstart', function (e) {
-                touchStartX = e.changedTouches[0].screenX;
+        // Workflow tab switching
+        function switchWorkflow(type) {
+            // Update tabs
+            const tabs = document.querySelectorAll('.workflow-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
             });
 
-            document.addEventListener('touchend', function (e) {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
+            event.target.classList.add('active');
+
+            // Update content
+            const contents = document.querySelectorAll('.workflow-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
             });
 
-            function handleSwipe() {
-                if (touchEndX < touchStartX - 50) {
-                    nextBtn.click();
-                }
-                if (touchEndX > touchStartX + 50) {
-                    prevBtn.click();
-                }
+            document.getElementById(`${type}-workflow`).classList.add('active');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create particles for each slide
+            for (let i = 1; i <= totalSlides; i++) {
+                createParticles(`particles-${i}`, 20);
+            }
+
+            // Create indicators
+            createIndicators();
+
+            // Update progress bar
+            updateProgressBar();
+
+            // Initialize zoom functionality
+            initZoom();
+        });
+
+        const video = document.getElementById('mvpVideo');
+
+        // Set playback speed when the video metadata is loaded
+        video.addEventListener('loadedmetadata', () => {
+            video.playbackRate = 2.0;
+        });
+
+        // Optional: keep enforcing 2x speed (in case user tries to change it)
+        video.addEventListener('ratechange', () => {
+            if (video.playbackRate !== 2.0) {
+                video.playbackRate = 2.0;
             }
         });
     </script>
